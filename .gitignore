@@ -5,6 +5,9 @@
 !/mkversion.exe
 /mkversion.vshost.exe
 /mkversion.vshost.exe.manifest
+!/mctoexception.exe
+/mctoexception.vshost.exe
+/mctoexception.vshost.exe.manifest
 
 # User-specific files
 *.suo
