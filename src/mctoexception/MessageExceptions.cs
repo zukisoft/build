@@ -42,23 +42,217 @@ namespace zuki.build
             
             #line default
             #line hidden
-            this.Write(@"_H_
-#pragma once
-
-#include <exception>
-#include <vector>
-#include <type_traits>
-#include <Windows.h>
-
-#pragma warning(push, 4)
-
-//-----------------------------------------------------------------------------
-
-#pragma warning(pop)
-
-#endif	// __AUTOGEN_");
+            this.Write("_H_\r\n#pragma once\r\n\r\n#include <exception>\r\n#include <vector>\r\n#include <type_trai" +
+                    "ts>\r\n#include <Windows.h>\r\n");
             
-            #line 22 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            #line 15 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+ foreach(string include in m_includes) { 
+            
+            #line default
+            #line hidden
+            this.Write("#include \"\"");
+            
+            #line 15 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(include));
+            
+            #line default
+            #line hidden
+            this.Write("\"\" ");
+            
+            #line 15 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("\r\n#pragma warning(push, 4)\r\n\r\nclass __autogen_");
+            
+            #line 19 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_classname));
+            
+            #line default
+            #line hidden
+            this.Write(" : public std::exception\r\n{\r\npublic:\r\n\r\n\t// messageid_t\r\n\t//\r\n\t// Message identif" +
+                    "ier data type\r\n\tusing messageid_t = ");
+            
+            #line 26 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_typedef));
+            
+            #line default
+            #line hidden
+            this.Write(";\r\n\r\n\tstatic_assert(sizeof(messageid_t) == sizeof(DWORD_PTR), \r\n\t\t\"Size of messag" +
+                    "e identifier type must be 32 bits for compatibility with FormatMessage\");\r\n\r\n\t//" +
+                    " Instance Constructor\r\n\t//\r\n\ttemplate <typename... _insertions>\r\n\t__autogen_");
+            
+            #line 34 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_classname));
+            
+            #line default
+            #line hidden
+            this.Write("(messageid_t messageid, _insertions const&... insertions) : m_what(AllocateMessag" +
+                    "e(messageid, insertions...)), m_owned((m_what != nullptr)) \r\n\t{\r\n\t}\r\n\r\n\t// Copy " +
+                    "Constructor\r\n\t//\r\n\t__autogen_");
+            
+            #line 40 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_classname));
+            
+            #line default
+            #line hidden
+            this.Write("(__autogen_");
+            
+            #line 40 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_classname));
+            
+            #line default
+            #line hidden
+            this.Write(" const& rhs) : m_what(rhs.m_what), m_owned(false) \r\n\t{\r\n\t}\r\n\r\n\t// Destructor\r\n\t//" +
+                    "\r\n\tvirtual ~__autogen_");
+            
+            #line 46 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_classname));
+            
+            #line default
+            #line hidden
+            this.Write("()\r\n\t{\r\n\t\tif(m_owned && (m_what != nullptr)) LocalFree(m_what);\r\n\t}\r\n\r\n\t// std::e" +
+                    "xception::what\r\n\t//\r\n\t// Gets a pointer to the exception message text\r\n\tvirtual " +
+                    "char const* what(void) const \r\n\t{ \r\n\t\treturn m_what;\r\n\t}\r\n\r\n\t// s_module\r\n\t//\r\n\t" +
+                    "// Initialized to the module handle of this compilation unit\r\n\tstatic HMODULE co" +
+                    "nst s_module;\r\n\r\nprivate:\r\n\r\n\t// is_charpointer<_type>\r\n\t//\r\n\t// Type traits use" +
+                    "d to determine if a template argument is of type char*\r\n\ttemplate<typename _type" +
+                    "> struct is_charpointer : public std::false_type {};\r\n\ttemplate<> struct is_char" +
+                    "pointer<char*> : public std::true_type {};\r\n\ttemplate<> struct is_charpointer<ch" +
+                    "ar const*> : public std::true_type {};\r\n\r\n\t// is_wcharpointer<_type>\r\n\t//\r\n\t// T" +
+                    "ype traits used to determine if a template argument is of type wchar_t*\r\n\ttempla" +
+                    "te<typename _type> struct is_wcharpointer : public std::false_type {};\r\n\ttemplat" +
+                    "e<> struct is_wcharpointer<wchar_t*> : public std::true_type {};\r\n\ttemplate<> st" +
+                    "ruct is_wcharpointer<wchar_t const*> : public std::true_type {};\r\n\r\n\t// Allocate" +
+                    "Message\r\n\t//\r\n\t// Generates the formatted exception message based on the message" +
+                    " identifier and insertions\r\n\ttemplate<typename... _remaining>\r\n\tstatic char* All" +
+                    "ocateMessage(messageid_t messageid, _remaining const&... remaining)\r\n\t{\r\n\t\tstd::" +
+                    "vector<DWORD_PTR> arguments;\r\n\t\treturn AllocateMessage(messageid, arguments, rem" +
+                    "aining...);\r\n\t}\r\n\r\n\t// AllocateMessage\r\n\t//\r\n\t// Intermediate variadic overload;" +
+                    " converts a single insertion argument into a DWORD_PTR value\r\n\ttemplate<typename" +
+                    " _first, typename... _remaining>\r\n\tstatic auto AllocateMessage(messageid_t messa" +
+                    "geid, std::vector<DWORD_PTR>& arguments, _first const& first, _remaining const&." +
+                    ".. remaining)\r\n\t\t-> typename std::enable_if<!is_charpointer<_first>::value && !i" +
+                    "s_wcharpointer<_first>::value, char*>::type\r\n\t{\r\n\t\tstatic_assert(!std::is_floati" +
+                    "ng_point<_first>::value, \r\n\t\t\t\"Floating point values cannot be specified as inse" +
+                    "rtions to FormatMessage\");\r\n\t\t\r\n\t\tstatic_assert(!(std::is_integral<_first>::valu" +
+                    "e && sizeof(_first) > sizeof(DWORD_PTR)), \r\n\t\t\t\"Integral values larger than 32 b" +
+                    "its in size cannot be specified as insertions to FormatMessage\");\r\n\r\n\t\targuments" +
+                    ".push_back((DWORD_PTR)first);\r\n\t\treturn AllocateMessage(messageid, arguments, re" +
+                    "maining...);\r\n\t}\r\n\r\n\t// AllocateMessage\r\n\t//\r\n\t// Intermediate variadic overload" +
+                    "; specialized for char* data types to handle null pointers\r\n\ttemplate<typename _" +
+                    "first, typename... _remaining>\r\n\tstatic auto AllocateMessage(messageid_t message" +
+                    "id, std::vector<DWORD_PTR>& arguments, _first const& first, _remaining const&..." +
+                    " remaining) \r\n\t\t-> typename std::enable_if<is_charpointer<_first>::value, char*>" +
+                    "::type\r\n\t{\r\n\t\targuments.push_back(reinterpret_cast<DWORD_PTR>(first == nullptr ?" +
+                    " s_null : first));\r\n\t\treturn AllocateMessage(messageid, arguments, remaining...)" +
+                    ";\r\n\t}\r\n\r\n\t// AllocateMessage\r\n\t//\r\n\t// Intermediate variadic overload; specializ" +
+                    "ed for wchar_t* data type to handle null pointers\r\n\ttemplate<typename _first, ty" +
+                    "pename... _remaining>\r\n\tstatic auto AllocateMessage(messageid_t messageid, std::" +
+                    "vector<DWORD_PTR>& arguments, _first const& first, _remaining const&... remainin" +
+                    "g) \r\n\t\t-> typename std::enable_if<is_wcharpointer<_first>::value, char*>::type\r\n" +
+                    "\t{\r\n\t\targuments.push_back(reinterpret_cast<DWORD_PTR>(first == nullptr ? s_widen" +
+                    "ull : first));\r\n\t\treturn AllocateMessage(messageid, arguments, remaining...);\r\n\t" +
+                    "}\r\n\r\n\t// AllocateMessage\r\n\t//\r\n\t// Final variadic overload; generates the format" +
+                    "ted message string with the collected insertions\r\n\tstatic char* AllocateMessage(" +
+                    "messageid_t messageid, std::vector<DWORD_PTR>& arguments)\r\n\t{\r\n\t\tLPTSTR message " +
+                    "= nullptr;\t\t\t\t\t// Allocated string from ::FormatMessage\r\n\r\n\t\t// Attempt to forma" +
+                    "t the message from the current module resources and provided insertions\r\n\t\tDWORD" +
+                    " cchmessage = ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FR" +
+                    "OM_HMODULE | FORMAT_MESSAGE_ARGUMENT_ARRAY, s_module, \r\n\t\t\tstatic_cast<DWORD>(me" +
+                    "ssageid), ::GetThreadUILanguage(), reinterpret_cast<LPTSTR>(&message), 0, reinte" +
+                    "rpret_cast<va_list*>(arguments.data())); \r\n\t\tif(cchmessage == 0) {\r\n\r\n\t\t\t// The " +
+                    "message could not be looked up in the specified module; generate the default mes" +
+                    "sage instead\r\n\t\t\tif(message) { LocalFree(message); message = nullptr; }\r\n\t\t\tcchm" +
+                    "essage = ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_ST" +
+                    "RING | FORMAT_MESSAGE_ARGUMENT_ARRAY, \r\n\t\t\t\ts_defaultformat, 0, 0, reinterpret_c" +
+                    "ast<LPTSTR>(&message), 0, reinterpret_cast<va_list*>(&messageid));\r\n\t\t\tif(cchmes" +
+                    "sage == 0) {\r\n\r\n\t\t\t\t// The default message could not be generated; give up\r\n\t\t\t\t" +
+                    "if(message) ::LocalFree(message);\r\n\t\t\t\treturn nullptr;\r\n\t\t\t}\r\n\t\t}\r\n\r\n");
+            
+            #line 153 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+ if(m_unicode) { 
+            
+            #line default
+            #line hidden
+            this.Write(@"		// UNICODE projects need to convert the message string into CP_UTF8 or CP_ACP
+		int convertcch = ::WideCharToMultiByte(CP_UTF8, 0, message, cchmessage, nullptr, 0, nullptr, nullptr);
+		char* converted = reinterpret_cast<char*>(::LocalAlloc(LMEM_FIXED | LMEM_ZEROINIT, (convertcch + 1) * sizeof(char)));
+		if(converted) ::WideCharToMultiByte(CP_UTF8, 0, message, cchmessage, converted, convertcch, nullptr, nullptr);
+
+		LocalFree(message);
+		return converted;
+");
+            
+            #line 161 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+ } else { 
+            
+            #line default
+            #line hidden
+            this.Write(" \r\n\t\treturn message;\r\n");
+            
+            #line 163 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write(@"	}
+
+	// Member Variables
+	//
+	char* const							m_what;	
+	bool const							m_owned;
+	static constexpr char const*		s_null			= ""<null pointer>"";
+	static constexpr wchar_t const*		s_widenull		= L""<null pointer>"";
+	static constexpr LPCTSTR			s_defaultformat	= _T(""Exception code 0x%1!08lX! : The message for this exception could not be generated."");
+};
+
+// __autogen_");
+            
+            #line 175 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_classname));
+            
+            #line default
+            #line hidden
+            this.Write("::s_module\r\n//\r\n// Initialized to the module handle of this compilation unit\r\n__d" +
+                    "eclspec(selectany)\r\nHMODULE const __autogen_");
+            
+            #line 179 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_classname));
+            
+            #line default
+            #line hidden
+            this.Write("::s_module = []() -> HMODULE {\r\n\r\n\tHMODULE module = nullptr;\r\n\r\n\t::GetModuleHandl" +
+                    "eEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED" +
+                    "_REFCOUNT,\r\n\t\treinterpret_cast<LPCTSTR>(&__autogen_");
+            
+            #line 184 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_classname));
+            
+            #line default
+            #line hidden
+            this.Write("::s_module), &module);\r\n\r\n\treturn module;\r\n}();\r\n\r\n//----------------------------" +
+                    "-------------------------------------------------\r\n// CUSTOM EXCEPTION CLASSES\r\n" +
+                    "//-----------------------------------------------------------------------------\r" +
+                    "\n");
+            
+            #line 192 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+ foreach(Message message in m_messages) { 
+            
+            #line default
+            #line hidden
+            this.Write(" CODE HERE ");
+            
+            #line 192 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("\r\n\r\n//---------------------------------------------------------------------------" +
+                    "--\r\n\r\n#pragma warning(pop)\r\n\r\n#endif\t// __AUTOGEN_");
+            
+            #line 199 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(m_classname.ToUpper()));
             
             #line default

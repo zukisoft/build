@@ -92,88 +92,25 @@ namespace zuki.build
 
 			try
 			{
+
 				string outdir = Path.GetDirectoryName(args[1]);
 				if (!Directory.Exists(outdir)) Directory.CreateDirectory(outdir);
 
+				// Create a MessageExceptions runtime text template for the output
+				MessageExceptions output = new MessageExceptions(Path.GetFileNameWithoutExtension(args[1]), Messages.Load(args[0], unicode), includes, unicode);
+
+				// Force the output file to Normal attributes if it exists, and overwrite it
 				if (File.Exists(args[1])) File.SetAttributes(args[1], FileAttributes.Normal);
 				using (StreamWriter sw = File.CreateText(args[1]))
 				{
-					string headername = Path.GetFileNameWithoutExtension(args[1]).ToUpper();
-
-					// HEADER
-					//
-					sw.WriteLine("#ifndef __AUTOGEN_" + headername + "_H_");
-					sw.WriteLine("#define __AUTOGEN_" + headername + "_H_");
-					sw.WriteLine();
-					sw.WriteLine("#include \"Exception.h\"");
-					foreach (string include in includes) sw.WriteLine("#include " + include);
-					sw.WriteLine();
-					sw.WriteLine("#pragma warning(push, 4)");
-					sw.WriteLine();
-
-					// _UNICODE
-					//
-					// The data types for some exception insertions require knowledge of if the project has _UNICODE
-					// defined or not, bad things can happen when passing the wrong string types into FormatMessage
-					if (unicode)
-					{
-						sw.WriteLine("#ifndef _UNICODE");
-						sw.WriteLine("#error Auto-generated exception classes require _UNICODE to be defined for this project");
-						sw.WriteLine("#endif");
-					}
-					else
-					{
-						sw.WriteLine("#ifdef _UNICODE");
-						sw.WriteLine("#error Auto-generated exception classes require _UNICODE is not defined for this project");
-						sw.WriteLine("#endif");
-					}
-					sw.WriteLine();
-
-					// EXCEPTION CLASSES
-					//
-					foreach (Message message in Messages.Load(args[0], unicode))
-					{
-						StringBuilder arguments = new StringBuilder();
-
-						sw.WriteLine("// " + message.ClassName);
-						sw.WriteLine("//");
-						foreach (string line in message.MessageText.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries))
-							sw.WriteLine("// " + line);
-
-						// struct CLASSNAME : public Exception
-						// {
-						sw.WriteLine("struct " + message.ClassName + " : public Exception");
-						sw.WriteLine("{");
-
-						//     explicit CLASSNAME([type] insert1, [type] insert2, [type] insert3) : Exception{insert1, insert2, insert3} {}
-						sw.Write("\texplicit " + message.ClassName + "(");
-						for (int index = 0; index < message.Arguments.Count; index++)
-							arguments.Append(message.Arguments[index].Key + " " + message.Arguments[index].Value + ", ");
-
-						sw.Write(arguments.ToString().TrimEnd(new char[] { ',', ' ' }));
-						sw.Write(") : Exception{ ");
-						arguments.Clear();
-						arguments.Append(message.SymbolicName + ", ");
-						for (int index = 0; index < message.Arguments.Count; index++) arguments.Append(message.Arguments[index].Value + ", ");
-						sw.Write(arguments.ToString().TrimEnd(new char[] { ',', ' ' }));
-						sw.WriteLine(" } {}");
-
-						//     virtual ~CLASSNAME()=default;
-						// };
-						sw.WriteLine("\tvirtual ~" + message.ClassName + "()=default;");
-						sw.WriteLine("};");
-						sw.WriteLine();
-					}
-
-					sw.WriteLine("#pragma warning(pop)");
-					sw.WriteLine();
-					sw.WriteLine("#endif	// __AUTOGEN_" + headername + "_H_");
-
+					// Transform the text template into the output file and flush the buffers
+					sw.Write(output.TransformText());
 					sw.Flush();
 				}
 
 				Console.WriteLine("mctoexception: " + args[0] + " --> " + args[1]);
 			}
+
 			catch (Exception ex)
 			{
 				Console.WriteLine("Exception: " + ex.Message);

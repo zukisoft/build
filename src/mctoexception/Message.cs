@@ -30,7 +30,7 @@ namespace zuki.build
 	/// <summary>
 	/// Creates exception class information based on an input message declaration
 	/// </summary>
-	class Message
+	internal class Message
 	{
 		/// <summary>
 		/// Instance Constructor

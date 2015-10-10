@@ -31,7 +31,7 @@ namespace zuki.build
 	/// <summary>
 	/// Collection of Message objects, loaded from an input MC text file
 	/// </summary>
-	class Messages : ReadOnlyCollection<Message>
+	internal class Messages : ReadOnlyCollection<Message>
 	{
 		/// <summary>
 		/// Instance Constructor
