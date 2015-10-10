@@ -28,33 +28,25 @@ using System.Text;
 
 namespace zuki.build
 {
-	//-------------------------------------------------------------------------
-	// Class Messages
-	//
-	// Collection of Message objects, loaded from an input MC text file
-	//-------------------------------------------------------------------------
-
+	/// <summary>
+	/// Collection of Message objects, loaded from an input MC text file
+	/// </summary>
 	class Messages : ReadOnlyCollection<Message>
 	{
-		// Instance Constructor (private)
-		//
+		/// <summary>
+		/// Instance Constructor
+		/// </summary>
+		/// <param name="messages">List<> of message objects to add on creation</param>
 		private Messages(List<Message> messages) : base(messages.AsReadOnly())
 		{
 		}
 
-		//---------------------------------------------------------------------
-		// Member Functions
-		//---------------------------------------------------------------------
-
-		//---------------------------------------------------------------------
-		// Load (static)
-		//
-		// Creates a new MessageFile instance by parsing an input .MC text file
-		//
-		// Arguments:
-		//
-		//	path		- Path to the MC text file to proces
-		public static Messages Load(string path)
+		/// <summary>
+		/// Creates a new MessageFile instance by parsing an input .MC text file
+		/// </summary>
+		/// <param name="path">Path to the input MC text file</param>
+		/// <param name="unicode">Flag if the target process will have _UNICODE defined</param>
+		public static Messages Load(string path, bool unicode)
 		{
 			// List<> to pass to the MessageFile constructor
 			List<Message> messages = new List<Message>();
@@ -69,6 +61,7 @@ namespace zuki.build
 					{
 						string symbolicname = String.Empty;
 						string classname = String.Empty;
+						List<string> argumentnames = new List<String>();
 						StringBuilder messagetext = new StringBuilder();
 
 						// Inside a message declaration, process it.  The MessageId= line itself is ignored,
@@ -80,10 +73,18 @@ namespace zuki.build
 
 							// ;//EXCEPTIONNAME=
 							//
-							// Custom tag to use to force a specific exception class name
+							// Custom tag to use to force a specific exception class name.  Optional argument
+							// names are comma delimited after the class name
 							if (nextline.StartsWith(";//ExceptionName=", StringComparison.OrdinalIgnoreCase))
 							{
-								if (nextline.Length > 17) classname = nextline.Substring(17);
+								if (nextline.Length > 17)
+								{
+									string[] parts = nextline.Substring(17).Split(new char[] { ',' });
+
+									classname = parts[0];
+									for (int index = 1; index < parts.Length; index++) argumentnames.Add(parts[index]);
+								}
+
 								nextline = sr.ReadLine();
 							}
 
@@ -145,7 +146,7 @@ namespace zuki.build
 
 								// If the required message information was collected, add it to the List<>
 								if (!String.IsNullOrEmpty(classname) && !String.IsNullOrEmpty(symbolicname) && (messagetext.Length > 0))
-									messages.Add(new Message(symbolicname, classname, messagetext.ToString()));
+									messages.Add(new Message(symbolicname, classname, messagetext.ToString(), argumentnames, unicode));
 
 								break;
 							}

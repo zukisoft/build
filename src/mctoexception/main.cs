@@ -44,48 +44,6 @@ namespace zuki.build
     static class main
 	{
 		/// <summary>
-		/// Converts an insertion string into a C++ data type argument
-		/// </summary>
-		/// <param name="insertion">Insertion string format</param>
-		/// <param name="unicode">Project _UNICODE flag</param>
-		/// <returns></returns>
-		static string InsertionToType(string insertion, bool unicode)
-		{
-			switch (insertion)
-			{
-				case "c": return "wchar_t";
-				case "C": return "wchar_t";
-				case "d": return "int";
-				case "hc": return "wchar_t";
-				case "hC": return "wchar_t";
-				case "hd": return "short";
-				case "hs": return "char const*";
-				case "hS": return "char const*";
-				case "hu": return "unsigned short";
-				case "i": return "int";
-				case "lc": return "wchar_t";
-				case "lC": return "wchar_t";
-				case "ld": return "long";
-				case "li": return "long";
-				case "ls": return "wchar_t const*";
-				case "lS": return "wchar_t const*";
-				case "lu": return "unsigned long";
-				case "lx": return "unsigned long";
-				case "lX": return "unsigned long";
-				case "p": return "void const*";
-				case "s": return (unicode) ? "wchar_t const*" : "char const*";
-				case "S": return (unicode) ? "char const*" : "wchar_t const*";
-				case "u": return "unsigned int";
-				case "x": return "unsigned int";
-				case "X": return "unsigned int";
-			}
-
-			// todo: still need to handle all the tokens wsprintf recognizes (-, #, precision, width, etc) -- this will need to 
-			// return an array/List<> of the types required to account for that, since precision and width can consume insertions (with *)
-			throw new Exception("Unrecognized MC file insertion string format [" + insertion + "]");
-		}
-
-		/// <summary>
 		/// Main application entry point
 		/// </summary>
 		/// <param name="cmdlineargs">Array of command line arguments</param>
@@ -173,7 +131,7 @@ namespace zuki.build
 
 					// EXCEPTION CLASSES
 					//
-					foreach (Message message in Messages.Load(args[0]))
+					foreach (Message message in Messages.Load(args[0], unicode))
 					{
 						StringBuilder arguments = new StringBuilder();
 
@@ -189,16 +147,14 @@ namespace zuki.build
 
 						//     explicit CLASSNAME([type] insert1, [type] insert2, [type] insert3) : Exception{insert1, insert2, insert3} {}
 						sw.Write("\texplicit " + message.ClassName + "(");
-						for (int index = 0; index < message.InsertionTypes.Count; index++)
-						{
-							arguments.Append(InsertionToType(message.InsertionTypes[index], unicode) + " ");
-							arguments.Append("insert" + (index + 1).ToString() + ", ");
-						}
+						for (int index = 0; index < message.Arguments.Count; index++)
+							arguments.Append(message.Arguments[index].Key + " " + message.Arguments[index].Value + ", ");
+
 						sw.Write(arguments.ToString().TrimEnd(new char[] { ',', ' ' }));
 						sw.Write(") : Exception{ ");
 						arguments.Clear();
 						arguments.Append(message.SymbolicName + ", ");
-						for (int index = 0; index < message.InsertionTypes.Count; index++) arguments.Append("insert" + (index + 1).ToString() + ", ");
+						for (int index = 0; index < message.Arguments.Count; index++) arguments.Append(message.Arguments[index].Value + ", ");
 						sw.Write(arguments.ToString().TrimEnd(new char[] { ',', ' ' }));
 						sw.WriteLine(" } {}");
 
