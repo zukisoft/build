@@ -100,7 +100,8 @@ namespace zuki.build
 			List<string>	switches = new List<string>();  // Command line switches
 			bool			unicode = false;				// _UNICODE flag
 			bool			namedonly = false;              // Only include named messages
-			List<string>	includes = new List<string>();	// List of includes
+			List<string>	includes = new List<string>();  // List of includes
+
 
 			args = new List<String>(cmdlineargs);				// Move into a List<>
 
