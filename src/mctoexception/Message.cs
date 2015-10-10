@@ -37,12 +37,11 @@ namespace zuki.build
 	{
 		// Instance Constructor
 		//
-		public Message(string facility, string symbolicname, string exceptionname, string messagetext)
+		public Message(string symbolicname, string classname, string messagetext)
 		{
-			m_facility = facility;
 			m_symbolicname = symbolicname;
 			m_message = messagetext;
-			m_exceptionname = exceptionname;
+			m_classname = classname;
 
 			// Collection of insertion data types
 			List<string> insertions = new List<string>();
@@ -91,20 +90,12 @@ namespace zuki.build
 		// Properties
 		//---------------------------------------------------------------------
 
-		// ExceptionName
+		// ClassName
 		//
 		// Gets the exception class name
-		public string ExceptionName
+		public string ClassName
 		{
-			get { return m_exceptionname; }
-		}
-
-		// Facility
-		//
-		// Gets the collected facility name
-		public string Facility
-		{
-			get { return m_facility; }
+			get { return m_classname; }
 		}
 
 		// InsertionTypes
@@ -135,10 +126,9 @@ namespace zuki.build
 		// Member Variables
 		//---------------------------------------------------------------------
 
-		private string						m_facility;			// Facility name
 		private string						m_symbolicname;     // Symbolic name
 		private string						m_message;          // Message text
-		private string						m_exceptionname;	// Exception name
+		private string						m_classname;		// Exception name
 		private ReadOnlyCollection<string>	m_insertions;		// Insertion types
 	}
 }

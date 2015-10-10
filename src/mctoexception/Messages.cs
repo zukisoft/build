@@ -62,16 +62,13 @@ namespace zuki.build
 			// Attempt to open the provided path as a normal text file
 			using (StreamReader sr = File.OpenText(path))
 			{
-				string lastFacility = String.Empty;			// Last seen facility name
-
 				string nextline = sr.ReadLine();
 				while (nextline != null)
 				{
 					if (nextline.TrimStart().StartsWith("MessageId=", StringComparison.OrdinalIgnoreCase))
 					{
-						string facility = lastFacility;
 						string symbolicname = String.Empty;
-						string exceptionname = String.Empty;
+						string classname = String.Empty;
 						StringBuilder messagetext = new StringBuilder();
 
 						// Inside a message declaration, process it.  The MessageId= line itself is ignored,
@@ -86,7 +83,7 @@ namespace zuki.build
 							// Custom tag to use to force a specific exception class name
 							if (nextline.StartsWith(";//ExceptionName=", StringComparison.OrdinalIgnoreCase))
 							{
-								if (nextline.Length > 17) exceptionname = nextline.Substring(17);
+								if (nextline.Length > 17) classname = nextline.Substring(17);
 								nextline = sr.ReadLine();
 							}
 
@@ -100,12 +97,9 @@ namespace zuki.build
 
 							// FACILITY=
 							//
-							// Set the facility for the current message and store as the last seen facility
+							// Ignored
 							else if (nextline.StartsWith("Facility=", StringComparison.OrdinalIgnoreCase))
 							{
-								if (nextline.Length > 9)
-									facility = lastFacility = nextline.Substring(9).TrimEnd();
-								
 								nextline = sr.ReadLine();
 							}
 
@@ -150,8 +144,8 @@ namespace zuki.build
 								}
 
 								// If the required message information was collected, add it to the List<>
-								if (!String.IsNullOrEmpty(facility) && !String.IsNullOrEmpty(symbolicname) && (messagetext.Length > 0))
-									messages.Add(new Message(facility, symbolicname, exceptionname, messagetext.ToString()));
+								if (!String.IsNullOrEmpty(classname) && !String.IsNullOrEmpty(symbolicname) && (messagetext.Length > 0))
+									messages.Add(new Message(symbolicname, classname, messagetext.ToString()));
 
 								break;
 							}

@@ -16,22 +16,18 @@
 // writing is in the "vm" project only, but could be extracted out and put
 // as an output from this tool as well.
 //
-// In the .MC file, the only customization is that you can put a special
-// ;//ExceptionName= tag in a message declaration to control the name of the
-// exception class that is generated.  Otherwise it will default to a really
-// ugly name of Facility+SymbolicName+Exception, for example:
+// In the .MC file, the only customization is that you put a special
+// ;//ExceptionName= tag in a message declaration to enable exception class
+// generation and specify the name of the class.  An optional comma-delimited
+// list of argument names can follow the class name:
 //
-//  Facility=Test
-//	SymbolicName=E_EPICFAIL
-//
-//	--> struct TestE_EPICFAILException : public Exception {}
+// ;//ExceptionName=MyException,argument1,argument2,argumentN
 //
 // USAGE:
 //
-//	MCTOEXCEPTION [-unicode] [-namedonly] [-include:"include.h"] inputfile.mc outputfile.h
+//	MCTOEXCEPTION [-unicode] [-include:"include.h"] inputfile.mc outputfile.h
 //
 //		-unicode		- Build for a project that defines _UNICODE
-//		-namedonly		- Only include entries that have custom ;//ExceptionName= tag
 //		-include:		- Add an #include into the file (can specify multiple times)
 //		inputfile.mc	- Input .MC file to process
 //		outputfile.h	- Output C++ header file
@@ -96,12 +92,10 @@ namespace zuki.build
 		[STAThread]
         static void Main(string[] cmdlineargs)
         {
-			List<string>	args;							// Command line arguments
-			List<string>	switches = new List<string>();  // Command line switches
-			bool			unicode = false;				// _UNICODE flag
-			bool			namedonly = false;              // Only include named messages
-			List<string>	includes = new List<string>();  // List of includes
-
+			List<string>	args;								// Command line arguments
+			List<string>	switches = new List<string>();		// Command line switches
+			bool			unicode = false;					// _UNICODE flag
+			List<string>	includes = new List<string>();		// List of includes
 
 			args = new List<String>(cmdlineargs);				// Move into a List<>
 
@@ -124,9 +118,6 @@ namespace zuki.build
 
 				// unicode -- set _UNICODE mode
 				if (sw == "unicode") unicode = true;
-
-				// namedonly -- set named-only mode
-				else if (sw == "namedonly") namedonly = true;
 
 				// include -- add an include
 				else if (sw.StartsWith("include:"))
@@ -184,28 +175,20 @@ namespace zuki.build
 					//
 					foreach (Message message in Messages.Load(args[0]))
 					{
-						// When -namedonly has been specified, don't generate exception classes for anything
-						// that didn't have the custom ;//ExceptionName= tag applied to it in the source file
-						if ((namedonly) && (String.IsNullOrEmpty(message.ExceptionName))) continue;
-
 						StringBuilder arguments = new StringBuilder();
 
-						// Generate a unique classname if none was specified
-						string classname = message.ExceptionName;
-						if (String.IsNullOrEmpty(classname)) classname = message.Facility + message.SymbolicName + "Exception";
-
-						sw.WriteLine("// " + classname);
+						sw.WriteLine("// " + message.ClassName);
 						sw.WriteLine("//");
 						foreach (string line in message.MessageText.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries))
 							sw.WriteLine("// " + line);
 
 						// struct CLASSNAME : public Exception
 						// {
-						sw.WriteLine("struct " + classname + " : public Exception");
+						sw.WriteLine("struct " + message.ClassName + " : public Exception");
 						sw.WriteLine("{");
 
 						//     explicit CLASSNAME([type] insert1, [type] insert2, [type] insert3) : Exception{insert1, insert2, insert3} {}
-						sw.Write("\texplicit " + classname + "(");
+						sw.Write("\texplicit " + message.ClassName + "(");
 						for (int index = 0; index < message.InsertionTypes.Count; index++)
 						{
 							arguments.Append(InsertionToType(message.InsertionTypes[index], unicode) + " ");
@@ -221,7 +204,7 @@ namespace zuki.build
 
 						//     virtual ~CLASSNAME()=default;
 						// };
-						sw.WriteLine("\tvirtual ~" + classname + "()=default;");
+						sw.WriteLine("\tvirtual ~" + message.ClassName + "()=default;");
 						sw.WriteLine("};");
 						sw.WriteLine();
 					}
