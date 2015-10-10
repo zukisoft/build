@@ -44,33 +44,47 @@ namespace zuki.build
     static class main
 	{
 		/// <summary>
+		/// Shows command line usage information
+		/// </summary>
+		static void ShowUsage()
+		{
+			Console.WriteLine(Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.FriendlyName).ToUpper() + " [-unicode] [-include:\"include.h\"] inputfile.mc outputfile.h");
+			Console.WriteLine();
+			Console.WriteLine("  -unicode      - Generate for a project that will define _UNICODE");
+			Console.WriteLine("  -include:     - Add an #include directive for the specified file(s)");
+			Console.WriteLine("  inputfile.mc  - Input message compiler .MC text file");
+			Console.WriteLine("  outputfile.h  - Output C++ header file");
+			Console.WriteLine();
+		}
+
+		/// <summary>
 		/// Main application entry point
 		/// </summary>
 		/// <param name="cmdlineargs">Array of command line arguments</param>
 		[STAThread]
-        static void Main(string[] cmdlineargs)
-        {
-			List<string>	args;								// Command line arguments
-			List<string>	switches = new List<string>();		// Command line switches
-			bool			unicode = false;					// _UNICODE flag
-			List<string>	includes = new List<string>();		// List of includes
+		static void Main(string[] cmdlineargs)
+		{
+			List<string> args;                              // Command line arguments
+			List<string> switches = new List<string>();     // Command line switches
+			bool unicode = false;							// _UNICODE flag
+			List<string> includes = new List<string>();     // List of includes
 
-			args = new List<String>(cmdlineargs);				// Move into a List<>
+			args = new List<String>(cmdlineargs);           // Move into a List<>
 
 			// Remove all switches from the argument list for separate processing
 			int switchindex = 0;
-			while(switchindex < args.Count)
+			while (switchindex < args.Count)
 			{
 				if (args[switchindex].StartsWith("/") || args[switchindex].StartsWith("-"))
 				{
-					if(args[switchindex].Length > 1) switches.Add(args[switchindex].Substring(1));
+					if (args[switchindex].Length > 1) switches.Add(args[switchindex].Substring(1));
 					args.RemoveAt(switchindex);
 				}
 				else switchindex++;
 			}
 
 			// Process command line switches
-			foreach(string switcharg in switches)
+			foreach (string switcharg in switches)
 			{
 				string sw = switcharg.ToLower();
 
@@ -80,41 +94,48 @@ namespace zuki.build
 				// include -- add an include
 				else if (sw.StartsWith("include:"))
 				{
-					if(sw.Length > 8) includes.Add(sw.Substring(8));
+					if (sw.Length > 8) includes.Add(sw.Substring(8));
 				}
 			}
 
-			if (args.Count < 2)
-			{
-				Console.WriteLine("Invalid command line arguments.  Please see documentation.");
-				return;
-			}
+			// Insufficient number of arguments
+			if (args.Count < 2) { ShowUsage(); return; }
 
 			try
 			{
+				Console.WriteLine(Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.FriendlyName).ToUpper());
+				Console.WriteLine();
 
+				Console.WriteLine("Input File  : " + args[0]);
+
+				// Create a MessageExceptions runtime text template for the output
+				Messages messages = Messages.Load(args[0], unicode);
+                MessageExceptions output = new MessageExceptions(Path.GetFileNameWithoutExtension(args[1]), messages, includes, unicode);
+
+				// Get the output directory name and ensure that it exists before continuing
 				string outdir = Path.GetDirectoryName(args[1]);
 				if (!Directory.Exists(outdir)) Directory.CreateDirectory(outdir);
 
-				// Create a MessageExceptions runtime text template for the output
-				MessageExceptions output = new MessageExceptions(Path.GetFileNameWithoutExtension(args[1]), Messages.Load(args[0], unicode), includes, unicode);
+				// Force the output file to Normal attributes if it exists, and delete it
+				if (File.Exists(args[1])) { File.SetAttributes(args[1], FileAttributes.Normal); File.Delete(args[1]); }
 
-				// Force the output file to Normal attributes if it exists, and overwrite it
-				if (File.Exists(args[1])) File.SetAttributes(args[1], FileAttributes.Normal);
+				Console.WriteLine("Output File : " + args[1]);
+				Console.WriteLine();
+
+				// Transform the T4 text template into the specified output file
 				using (StreamWriter sw = File.CreateText(args[1]))
 				{
-					// Transform the text template into the output file and flush the buffers
 					sw.Write(output.TransformText());
 					sw.Flush();
 				}
 
-				Console.WriteLine("mctoexception: " + args[0] + " --> " + args[1]);
+				Console.WriteLine("Successfully generated " + messages.Count.ToString() + " custom exceptions");
 			}
 
 			catch (Exception ex)
 			{
-				Console.WriteLine("Exception: " + ex.Message);
-				return;
+				Console.WriteLine();
+				Console.WriteLine("ERROR: " + ex.Message);
 			}
 		}
 	}
