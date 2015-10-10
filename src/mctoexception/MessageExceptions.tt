@@ -12,28 +12,20 @@
 #include <vector>
 #include <type_traits>
 #include <Windows.h>
-<# foreach(string include in m_includes) { #>#include ""<#= include #>"" <# } #>
+<# foreach(string include in m_includes) { #>
+#include <#= include #> 
+<# } #>
 
 #pragma warning(push, 4)
+
+//-----------------------------------------------------------------------------
+// __autogen_<#= m_classname #>
+//
+// Auto-generated base class for custom exceptions declared below
 
 class __autogen_<#= m_classname #> : public std::exception
 {
 public:
-
-	// messageid_t
-	//
-	// Message identifier data type
-	using messageid_t = <#= m_typedef #>;
-
-	static_assert(sizeof(messageid_t) == sizeof(DWORD_PTR), 
-		"Size of message identifier type must be 32 bits for compatibility with FormatMessage");
-
-	// Instance Constructor
-	//
-	template <typename... _insertions>
-	__autogen_<#= m_classname #>(messageid_t messageid, _insertions const&... insertions) : m_what(AllocateMessage(messageid, insertions...)), m_owned((m_what != nullptr)) 
-	{
-	}
 
 	// Copy Constructor
 	//
@@ -60,6 +52,22 @@ public:
 	//
 	// Initialized to the module handle of this compilation unit
 	static HMODULE const s_module;
+
+protected:
+
+	// messageid_t
+	//
+	// Message identifier data type
+	using messageid_t = <#= m_typedef #>;
+
+	static_assert(sizeof(messageid_t) == sizeof(DWORD_PTR), "Size of message identifier type must be 32 bits for compatibility with FormatMessage");
+
+	// Instance Constructor
+	//
+	template <typename... _insertions>
+	__autogen_<#= m_classname #>(messageid_t messageid, _insertions const&... insertions) : m_what(AllocateMessage(messageid, insertions...)), m_owned((m_what != nullptr)) 
+	{
+	}
 
 private:
 
@@ -169,7 +177,7 @@ private:
 	bool const							m_owned;
 	static constexpr char const*		s_null			= "<null pointer>";
 	static constexpr wchar_t const*		s_widenull		= L"<null pointer>";
-	static constexpr LPCTSTR			s_defaultformat	= _T("Exception code 0x%1!08lX! : The message for this exception could not be generated.");
+	static constexpr LPCTSTR			s_defaultformat	= TEXT("Exception code 0x%1!08lX! : The message for this exception could not be generated.");
 };
 
 // __autogen_<#= m_classname #>::s_module
@@ -189,9 +197,18 @@ HMODULE const __autogen_<#= m_classname #>::s_module = []() -> HMODULE {
 //-----------------------------------------------------------------------------
 // CUSTOM EXCEPTION CLASSES
 //-----------------------------------------------------------------------------
-<# foreach(Message message in m_messages) { #> CODE HERE <# } #>
 
+<# foreach(Message message in m_messages) { #>
+// <#= message.ClassName #> (<#= message.SymbolicName #>)
+//
+// <#= message.MessageText #>
+struct <#= message.ClassName #> : public __autogen_<#= m_classname #>
+{
+	explicit <#= message.ClassName #>(<# for(int index = 0; index < message.Arguments.Count; index++) { #><#= message.Arguments[index].Key #> <#= message.Arguments[index].Value #><# if(index + 1 < message.Arguments.Count) { #>, <# } #><# } #>) : __autogen_<#= m_classname #>(<#= message.SymbolicName #><# for(int index = 0; index < message.Arguments.Count; index++) { #>, <#= message.Arguments[index].Value #><# } #>) {}
+	virtual ~<#= message.ClassName #>()=default;
+};
 
+<# } #>
 //-----------------------------------------------------------------------------
 
 #pragma warning(pop)

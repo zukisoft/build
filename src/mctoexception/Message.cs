@@ -43,9 +43,10 @@ namespace zuki.build
 		public Message(string symbolicname, string classname, string messagetext, List<string> argumentnames, bool unicode)
 		{
 			m_symbolicname = symbolicname;			// Store the provided symbolic name
-			m_message = messagetext;				// Store the provided message text
-			m_classname = classname;				// Store the provided class name
+			m_classname = classname;                // Store the provided class name
 
+			m_message = messagetext.TrimEnd(new char[] { ' ', '\r', '\n' });
+			
 			// Collection of arguments
 			List<KeyValuePair<string, string>> arguments = new List<KeyValuePair<string, string>>();
 
