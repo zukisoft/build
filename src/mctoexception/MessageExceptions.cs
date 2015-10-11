@@ -165,7 +165,7 @@ protected:
 	using messageid_t = ");
             
             #line 78 "D:\GitHub\build\src\mctoexception\MessageExceptions.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_typedef));
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_messages.MessageIdTypedef));
             
             #line default
             #line hidden

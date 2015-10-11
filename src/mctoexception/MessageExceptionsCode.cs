@@ -43,9 +43,6 @@ namespace zuki.build
 			m_messages = messages;
 			m_includes = includes;
 			m_unicode = unicode;
-
-			// todo: typedef type needs to be an argument
-			m_typedef = "HRESULT";
 		}
 
 		/// <summary>
@@ -67,10 +64,5 @@ namespace zuki.build
 		/// Flag if the target project will have _UNICODE enabled
 		/// </summary>
 		private bool m_unicode;
-
-		/// <summary>
-		/// Indicates the name of the message identifier typedef to use
-		/// </summary>
-		private string m_typedef;
 	}
 }

@@ -75,7 +75,7 @@ protected:
 	// messageid_t
 	//
 	// Message identifier data type
-	using messageid_t = <#= m_typedef #>;
+	using messageid_t = <#= m_messages.MessageIdTypedef #>;
 
 	static_assert(sizeof(messageid_t) == sizeof(DWORD_PTR), "Size of message identifier type must be 32 bits for compatibility with FormatMessage");
 

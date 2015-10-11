@@ -36,9 +36,11 @@ namespace zuki.build
 		/// <summary>
 		/// Instance Constructor
 		/// </summary>
+		/// <param name="typedef">Value of the MessageIdTypedef indicator</param>
 		/// <param name="messages">List<> of message objects to add on creation</param>
-		private Messages(List<Message> messages) : base(messages.AsReadOnly())
+		private Messages(string typedef, List<Message> messages) : base(messages.AsReadOnly())
 		{
+			m_typedef = typedef;
 		}
 
 		/// <summary>
@@ -48,6 +50,8 @@ namespace zuki.build
 		/// <param name="unicode">Flag if the target process will have _UNICODE defined</param>
 		public static Messages Load(string path, bool unicode)
 		{
+			string typedef = "DWORD";				// Default MessageIdTypedef value
+
 			// List<> to pass to the MessageFile constructor
 			List<Message> messages = new List<Message>();
 
@@ -57,7 +61,16 @@ namespace zuki.build
 				string nextline = sr.ReadLine();
 				while (nextline != null)
 				{
-					if (nextline.TrimStart().StartsWith("MessageId=", StringComparison.OrdinalIgnoreCase))
+					// MESSAGEIDTYPEDEF=
+					//
+					// Change the current message id typedef string to reflect this data type
+					if (nextline.TrimStart().StartsWith("MessageIdTypedef=", StringComparison.OrdinalIgnoreCase))
+					{
+						if (nextline.Length > 17) typedef = nextline.Substring(17);
+						nextline = sr.ReadLine();
+					}
+
+					else if (nextline.TrimStart().StartsWith("MessageId=", StringComparison.OrdinalIgnoreCase))
 					{
 						string symbolicname = String.Empty;
 						string classname = String.Empty;
@@ -85,6 +98,15 @@ namespace zuki.build
 									for (int index = 1; index < parts.Length; index++) argumentnames.Add(parts[index]);
 								}
 
+								nextline = sr.ReadLine();
+							}
+
+							// MESSAGEIDTYPEDEF=
+							//
+							// Change the current message id typedef string to reflect this data type
+							if (nextline.StartsWith("MessageIdTypedef=", StringComparison.OrdinalIgnoreCase))
+							{
+								if (nextline.Length > 17) typedef = nextline.Substring(17);
 								nextline = sr.ReadLine();
 							}
 
@@ -158,7 +180,20 @@ namespace zuki.build
 			}
 
 			// Pass the List<> instance to the MessageFile constructor
-			return new Messages(messages);
+			return new Messages(typedef, messages);
 		}
+
+		/// <summary>
+		/// Gets the C++ data type defined as the message id data type
+		/// </summary>
+		public string MessageIdTypedef
+		{
+			get { return m_typedef; }
+		}
+
+		/// <summary>
+		/// Value of the input file's MessageIdTypedef
+		/// </summary>
+		private string m_typedef;
 	}
 }
